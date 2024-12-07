@@ -16,7 +16,6 @@ var isLeft;
 var isRight;
 var isFalling;
 var isPlummeting;
-var touchedTheGround;
 var aKey;
 var wKey;
 var dKey;
@@ -25,6 +24,9 @@ var rightKey;
 var leftKey;
 var upKey;
 var downKey;
+var collectable;
+var canyon;
+var overTheCanyon;
 
 function setup()
 {
@@ -37,7 +39,7 @@ function setup()
 	isRight = false;
 	isFalling = false;
 	isPlummeting = false;
-	touchedTheGround = true;
+	overTheCanyon = false;
 	rightKey = 39;
 	leftKey = 37;
 	upKey = 38;
@@ -46,29 +48,67 @@ function setup()
 	dKey = 68;
 	wKey = 87;
 	sKey= 83;
+
+	collectable = {
+		x_pos: 230,
+		y_pos: floorPos_y,
+		size: 20,
+		isFound: false
+	}
+
+	canyon = {
+		x_pos: 70,
+		y_pos: 433,
+		canyonHeight: 142,
+		canyonWidth: 60,
+	}
 }
 
-function draw()
-{
+function draw() {
 	///////////DRAWING CODE//////////
 
-	background(100,155,255); //fill the sky blue
+	background(100, 155, 255); //fill the sky blue
 
-
+	//floor
 	noStroke();
-	fill(0,155,0);
-	rect(0, floorPos_y, width, height - floorPos_y); //draw some green ground
+	fill(0, 155, 0);
+	rect(0, floorPos_y, width, height - floorPos_y);
+
+	//collectable egg
+	if (dist(gameChar_x, gameChar_y, collectable.x_pos, collectable.y_pos) < 20) {
+		collectable.isFound = true;
+	}
+	if (!collectable.isFound) {
+		stroke(0);
+		fill(255);
+		ellipse(collectable.x_pos, collectable.y_pos - 15, collectable.size, 30);
+		fill(87, 145, 130);
+		ellipse(collectable.x_pos, collectable.y_pos - 7, collectable.size - 11);
+		ellipse(collectable.x_pos - 5, collectable.y_pos - 18, collectable.size - 12);
+		ellipse(collectable.x_pos + 5, collectable.y_pos - 22, collectable.size - 15);
+	}
+
+
+
+	if(gameChar_x > canyon.x_pos &&
+	gameChar_x < canyon.x_pos + canyon.canyonWidth &&
+	gameChar_y === floorPos_y) {
+		overTheCanyon = true;
+		isFalling = true;
+	}
 
 	//draw the canyon
-
 	stroke(0);
 	fill(0)
-	rect(70, 433, 30, 90);
-	rect(100, 493, 30, 200);
-	rect(130, 547, 470, 30);
+	rect(
+		canyon.x_pos,
+		canyon.y_pos,
+		canyon.canyonWidth,
+		canyon.canyonHeight
+	);
 
 	//the game character
-	if(isLeft && isFalling)
+	if(isLeft && isFalling && !overTheCanyon)
 	{
 		// add your jumping-left code
 		//head
@@ -98,7 +138,7 @@ function draw()
 			gameChar_y - 19
 		);
 	}
-	else if(isRight && isFalling)
+	else if(isRight && isFalling && !overTheCanyon)
 	{
 		// add your jumping-right code
 		//head
@@ -129,7 +169,7 @@ function draw()
 		);
 
 	}
-	else if(isLeft)
+	else if(isLeft && !overTheCanyon)
 	{
 		// add your walking left code
 		//head
@@ -158,7 +198,7 @@ function draw()
 		);
 
 	}
-	else if(isRight)
+	else if(isRight && !overTheCanyon)
 	{
 		// add your walking right code
 		//head
@@ -187,7 +227,7 @@ function draw()
 		);
 
 	}
-	else if(isFalling || isPlummeting)
+	else if(isFalling || isPlummeting && !overTheCanyon)
 	{
 		// add your jumping facing forwards code
 
@@ -236,23 +276,22 @@ function draw()
 	///////////INTERACTION CODE//////////
 	//Put conditional statements to move the game character below here
 
-	if(isLeft) {
+	if(isLeft && !overTheCanyon) {
 		gameChar_x -= 5;
 	}
-	if(isRight) {
+	if(isRight && !overTheCanyon) {
 		gameChar_x += 5;
 	}
-	if(isFalling){
-		gameChar_y += 2;
-		touchedTheGround = gameChar_y >= floorPos_y;
-		// prevents from pass the floor
-
+	if (isFalling) {
+		gameChar_y += 4;
+		if (gameChar_y >= height ) { //prevents from pass the screen
+			isFalling = false;
+		}
 	}
-	if(isPlummeting) {
+	if(isPlummeting && !overTheCanyon) {
 		gameChar_y -= 4;
-		touchedTheGround = false;
 	}
-	if(touchedTheGround){
+	if (gameChar_y === floorPos_y) {
 		isFalling = false;
 	}
 }
@@ -267,7 +306,6 @@ function keyPressed() {
 
 	switch (keyCode) {
 		case rightKey:
-		case dKey:
 			isRight = true;
 			break;
 		case leftKey:
@@ -279,10 +317,6 @@ function keyPressed() {
 			if(!isFalling){
 				isPlummeting = true;
 			}
-			break;
-		case downKey:
-		case sKey:
-			isFalling = true;
 			break;
 		default:
 			alert("Please press a valid key to move the turtle: arrows OR a, w, d, s.");
