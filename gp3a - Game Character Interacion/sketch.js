@@ -90,6 +90,7 @@ function draw() {
 
 
 
+	//fall into the canyon
 	if(gameChar_x > canyon.x_pos &&
 	gameChar_x < canyon.x_pos + canyon.canyonWidth &&
 	gameChar_y === floorPos_y) {
@@ -283,17 +284,15 @@ function draw() {
 		gameChar_x += 5;
 	}
 	if (isFalling) {
-		gameChar_y += 4;
-		if (gameChar_y >= height ) { //prevents from pass the screen
-			isFalling = false;
-		}
-	}
-	if(isPlummeting && !overTheCanyon) {
 		gameChar_y -= 4;
 	}
-	if (gameChar_y === floorPos_y) {
-		isFalling = false;
+	if(isPlummeting && !overTheCanyon) {
+		gameChar_y += 4;
+		if(gameChar_y >= height || gameChar_y === floorPos_y) {
+			isPlummeting = false;
+		}
 	}
+
 }
 
 
@@ -314,9 +313,7 @@ function keyPressed() {
 			break;
 		case upKey:
 		case wKey:
-			if(!isFalling){
-				isPlummeting = true;
-			}
+			isFalling = true;
 			break;
 		default:
 			alert("Please press a valid key to move the turtle: arrows OR a, w, d, s.");
@@ -340,8 +337,8 @@ function keyReleased()
 			break;
 		case upKey:
 			case wKey:
-			isPlummeting = false;
-			isFalling = true;
+				isFalling = false;
+			isPlummeting = true;
 			break;
 	}
 }
