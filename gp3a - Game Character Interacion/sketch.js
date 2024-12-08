@@ -26,7 +26,7 @@ var upKey;
 var downKey;
 var collectable;
 var canyon;
-var overTheCanyon;
+var insideTheCanyon;
 
 function setup()
 {
@@ -39,7 +39,7 @@ function setup()
 	isRight = false;
 	isFalling = false;
 	isPlummeting = false;
-	overTheCanyon = false;
+	insideTheCanyon = false;
 	rightKey = 39;
 	leftKey = 37;
 	upKey = 38;
@@ -89,13 +89,14 @@ function draw() {
 	}
 
 
-
-	//fall into the canyon
-	if(gameChar_x > canyon.x_pos &&
-	gameChar_x < canyon.x_pos + canyon.canyonWidth &&
-	gameChar_y === floorPos_y) {
-		overTheCanyon = true;
-		isFalling = true;
+	// Is inside the canyon
+	if(
+		gameChar_y == floorPos_y &&
+		gameChar_x > canyon.x_pos &&
+		gameChar_x < canyon.x_pos + canyon.canyonWidth
+	) {
+		isPlummeting = true;
+		insideTheCanyon = true;
 	}
 
 	//draw the canyon
@@ -109,7 +110,7 @@ function draw() {
 	);
 
 	//the game character
-	if(isLeft && isFalling && !overTheCanyon)
+	if(isLeft && isFalling)
 	{
 		// add your jumping-left code
 		//head
@@ -139,7 +140,7 @@ function draw() {
 			gameChar_y - 19
 		);
 	}
-	else if(isRight && isFalling && !overTheCanyon)
+	else if(isRight && isFalling)
 	{
 		// add your jumping-right code
 		//head
@@ -170,7 +171,7 @@ function draw() {
 		);
 
 	}
-	else if(isLeft && !overTheCanyon)
+	else if(isLeft)
 	{
 		// add your walking left code
 		//head
@@ -199,7 +200,7 @@ function draw() {
 		);
 
 	}
-	else if(isRight && !overTheCanyon)
+	else if(isRight)
 	{
 		// add your walking right code
 		//head
@@ -228,7 +229,7 @@ function draw() {
 		);
 
 	}
-	else if(isFalling || isPlummeting && !overTheCanyon)
+	else if(isFalling || isPlummeting)
 	{
 		// add your jumping facing forwards code
 
@@ -277,69 +278,65 @@ function draw() {
 	///////////INTERACTION CODE//////////
 	//Put conditional statements to move the game character below here
 
-	if(isLeft && !overTheCanyon) {
+	if(isLeft) {
 		gameChar_x -= 5;
 	}
-	if(isRight && !overTheCanyon) {
+	if(isRight) {
 		gameChar_x += 5;
 	}
 	if (isFalling) {
 		gameChar_y -= 4;
 	}
-	if(isPlummeting && !overTheCanyon) {
+	if(isPlummeting) {
 		gameChar_y += 4;
 		if(gameChar_y >= height || gameChar_y === floorPos_y) {
 			isPlummeting = false;
+			}
+		}
+}
+
+
+function keyPressed() {
+	if(!insideTheCanyon){
+		switch (keyCode) {
+			case rightKey:
+				isRight = true;
+				break;
+			case leftKey:
+			case aKey:
+				isLeft = true;
+				break;
+			case upKey:
+			case wKey:
+				if (!isPlummeting) {
+					isFalling = true;
+				}
+				break;
+			default:
+				alert("Please press a valid key to move the turtle: arrows OR a, w, d, s.");
+				break;
 		}
 	}
 
 }
 
-
-function keyPressed() {
-	// switch case to control the animation of the character when
-	// keys are pressed.
-
-	//open up the console to see how these work
-
-
-	switch (keyCode) {
-		case rightKey:
-			isRight = true;
-			break;
-		case leftKey:
-		case aKey:
-			isLeft = true;
-			break;
-		case upKey:
-		case wKey:
-			isFalling = true;
-			break;
-		default:
-			alert("Please press a valid key to move the turtle: arrows OR a, w, d, s.");
-			break;
-	}
-}
-
-function keyReleased()
-{
-	// switch case to control the animation of the character when
-	// keys are released.
-
-	switch (keyCode) {
-		case rightKey:
+function keyReleased() {
+	if(!insideTheCanyon) {
+		switch (keyCode) {
+			case rightKey:
 			case dKey:
-			isRight = false;
-			break;
-		case leftKey:
-		case aKey:
-			isLeft = false;
-			break;
-		case upKey:
+				isRight = false;
+				break;
+			case leftKey:
+			case aKey:
+				isLeft = false;
+				break;
+			case upKey:
 			case wKey:
 				isFalling = false;
-			isPlummeting = true;
-			break;
+				isPlummeting = true;
+				break;
+		}
 	}
 }
 
